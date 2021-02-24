@@ -100,20 +100,22 @@
     
       $(function() {
         $(".select").change(function(){
-        var tag = $(this).val(); 
-        if(tag == "all"){
-          $('.list li').each(function(){ $(this).show() }); 
-        } else {
-          $('.list li').each(function(){
-            if($(this).data("category-type") == tag){ 
-              $(this).show();
-            } else {
-              $(this).hide(); 
-        }
+          var tag = $(this).val(); 
+          if(tag == "all"){
+            $('.list li').each(function(){
+              $(this).show() 
+            }); 
+          } else {
+            $('.list li').each(function(){
+              if($(this).data("category-type") == tag){ 
+                $(this).show();
+              } else {
+                $(this).hide(); 
+              }
+            });
+          }
+        });
       });
-    }
-  });
-});
     
     </script>
   </body>
