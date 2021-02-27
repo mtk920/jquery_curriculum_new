@@ -90,49 +90,86 @@
       //     <a class="btn-item" data-js="page-next" href="">次へ</a>
       //   </div>
       // </div>
-      
-
-      function ajaxstart(){}
-
+    
       $(function () {
         $('.search__btn').on('click', function() {
           var searchword = $('.search__text__input').val();
           console.log(searchword);
           $.ajax({
-            url: 'https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?',
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
             type: 'GET',
             datatype: 'json',
             data: {
               keyword: searchword,
               applicationId: appId,
               booksGenreId: '001',
-              hits: '20'
+              hits: '20',
             },
           }).done(function(data) {
             console.log(data);
-            if (data.count > 0){
-              $('ul').empty();
-              $.each(data.Items, function(index, value){
-                var addlist = '<li class="lists__item">' +
-                  '<div class="lists__item__inner">' +
-                  '<a href="" class="lists__item__link" target="_blank">' +
-                  '<img src="' + value.Item.mediumImageUrl + '" class="lists__item__img" alt="">' +
-                  '<p class="lists__item__detail">作品名： ' + value.Item.title + '</p>' +
-                  '<p class="lists__item__detail">作者  ： ' + value.Item.author + '</p>' +
-                  '<p class="lists__item__detail">出版社： ' + value.Item.publisherName + ' </p>' +
-                  '</a>' +
-                  '</div>' +
-                  '</li>';
-                $('ul').prepend(addlist);
-              })
-            } else {
-                 $('.lists').before(
-                   '<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>');
-            }
+            addhtml(data);
+          }).fail(function(){
+            error();
+          })
+          $('.btn-item[data-js="page-next"]').on('click', function(data){
+          data.page += 1;
+          addhtml(data);
           });
-          
+         $('.btn-item[data-js="page-prev"]').on('click', function(data){
+          data.page -= 1;
+          addhtml(data);
+        });    
         });
+         
       });
+
+
+      //関数定義
+      function addhtml(data){
+        if (data.count > 0){
+          $('ul').empty();
+          $.each(data.Items, function(index, value){
+          var addlist = '<li class="lists__item">' +
+            '<div class="lists__item__inner">' +
+            '<a href="" class="lists__item__link" target="_blank">' +
+            '<img src="' + value.Item.mediumImageUrl + '" class="lists__item__img" alt="">' +
+            '<p class="lists__item__detail">作品名： ' + value.Item.title + '</p>' +
+            '<p class="lists__item__detail">作者  ： ' + value.Item.author + '</p>' +
+            '<p class="lists__item__detail">出版社： ' + value.Item.publisherName + ' </p>' +
+            '</a>' +
+            '</div>' +
+            '</li>';
+            $('ul').prepend(addlist);
+          })
+          //ページャ
+          var pager =  '<div class="pager" data-js="pager">' +
+            '<div class="counter">' +
+            '<span class="counter-current">' + data.page + '</span>' +
+            '/<span class="counter-all">' + data.pageCount + '</span>' +
+            '</div>' + '<div class="btn-wrapper">' + '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+            '<a class="btn-item" data-js="page-next" href="">次へ</a>' + 
+            '</div>' + '</div>';
+            $('ul').append(pager);
+
+          if (data.page === 1){
+            $('.btn-item[data-js="page-prev"]').addClass('disabled');
+          } else if (data.page === data.pageCount){
+            $('.btn-item[data-js="page-next"]').addClass('disabled');
+          } else if (data.pageCount === 1){
+            $('.btn-item').addClass('disabled');
+          }
+        } else {
+          $('.lists').before(
+          '<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>');
+        }
+      };
+
+      function error(){
+        $('ul').empty();
+        $('ul').prepend(
+        '<p class="message">通信エラーが発生しています。<br>検索ワードや通信が正常に出来ているか確認してください。</p>');
+      }
+
     </script>
   </body>
 </html>
