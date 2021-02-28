@@ -93,37 +93,47 @@
     
       $(function () {
         $('.search__btn').on('click', function() {
-          var searchword = $('.search__text__input').val();
-          console.log(searchword);
-          $.ajax({
-            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-            type: 'GET',
-            datatype: 'json',
-            data: {
-              keyword: searchword,
-              applicationId: appId,
-              booksGenreId: '001',
-              hits: '20',
-            },
-          }).done(function(data) {
-            console.log(data);
-            addhtml(data);
-          }).fail(function(){
-            error();
-          })
-          $('.btn-item[data-js="page-next"]').on('click', function(data){
-          data.page += 1;
+          ajax();
+        }); 
+        $('.btn-item[data-js="page-next"]').on('click', function(){
+          ajax();
+          e.preventDefault();
+          page += 1;
           addhtml(data);
           });
-          $('.btn-item[data-js="page-prev"]').on('click', function(data){
-          data.page -= 1;
+          $('.btn-item[data-js="page-prev"]').on('click', function(){
+          ajax();
+          e.preventDefault();
+          page -= 1;
           addhtml(data);
           });    
-        }); 
       });
 
 
       //関数定義
+      function ajax(){
+        var searchword = $('.search__text__input').val();
+        console.log(searchword);
+        var page = page;
+        $.ajax({
+          url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+          type: 'GET',
+          datatype: 'json',
+          data: {
+            keyword: searchword,
+            applicationId: appId,
+            booksGenreId: '001',
+            hits: '20',
+            page: page
+          },
+        }).done(function(data) {
+          console.log(data);
+          addhtml(data);
+        }).fail(function(){
+          error();
+        })
+      }
+
       function addhtml(data){
         if (data.count > 0){
           $('ul').empty();
