@@ -131,43 +131,59 @@
         }).done(function(data) {
           console.log(data);
           addhtml(data);
-        }).fail(function(){
-          error();
+        }).fail(function(err){
+          console.log(err);
+          console.log(err.responseJSON.error);
+          error(err.responseJSON.error);
         })
       }
 
       function addhtml(data){
         if (data.count > 0){
-          $('ul').empty();
+          alllist = ''
+          $('.lists').empty();
           $.each(data.Items, function(index, value){
-          var addlist = '<li class="lists__item">' +
-            '<div class="lists__item__inner">' +
-            '<a href="" class="lists__item__link" target="_blank">' +
-            '<img src="' + value.Item.mediumImageUrl + '" class="lists__item__img" alt="">' +
-            '<p class="lists__item__detail">作品名： ' + value.Item.title + '</p>' +
-            '<p class="lists__item__detail">作者  ： ' + value.Item.author + '</p>' +
-            '<p class="lists__item__detail">出版社： ' + value.Item.publisherName + ' </p>' +
-            '</a>' +
-            '</div>' +
-            '</li>';
-            $('ul').prepend(addlist);
+            var addlist = '<li class="lists__item">' +
+                            '<div class="lists__item__inner">' +
+                              '<a href="" class="lists__item__link" target="_blank">' +
+                                '<img src="' + value.Item.mediumImageUrl + '" class="lists__item__img" alt="">' +
+                                '<p class="lists__item__detail">作品名： ' + value.Item.title + '</p>' +
+                                '<p class="lists__item__detail">作者  ： ' + value.Item.author + '</p>' +
+                                '<p class="lists__item__detail">出版社： ' + value.Item.publisherName + ' </p>' +
+                              '</a>' +
+                            '</div>' +
+                          '</li>';
+            alllist += addlist;
           })
+          $('.lists').prepend(alllist);
           //ページャ
           var pager =  '<div class="pager" data-js="pager">' +
-            '<div class="counter">' +
-            '<span class="counter-current">' + data.page + '</span>' +
-            '/<span class="counter-all">' + data.pageCount + '</span>' +
-            '</div>' + '<div class="btn-wrapper">' + '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
-            '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
-            '</div>' + '</div>';
-            $('ul').append(pager);
+                          '<div class="counter">' +
+                            '<span class="counter-current">' + data.page + '</span>' +
+                            '/<span class="counter-all">' + data.pageCount + '</span>' +
+                          '</div>' +
+                          '<div class="btn-wrapper">' +
+                            '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+                            '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
+                          '</div>' +
+                        '</div>';
+          $('.lists').append(pager);
 
           if (data.page === 1){
-            $('.btn-item[data-js="page-prev"]').addClass('disabled');
+            $('.btn-item[data-js="page-prev"]').addClass('disabled').prop("disabled", true);
+            $('.btn-item[data-js="page-prev"]').click(function(){
+              return false;
+            })
           } else if (data.page === data.pageCount){
-            $('.btn-item[data-js="page-next"]').addClass('disabled');
+            $('.btn-item[data-js="page-next"]').addClass('disabled').prop("disabled", true);
+            $('.btn-item[data-js="page-next"]').click(function(){
+              return false;
+            })
           } else if (data.pageCount === 1){
             $('.btn-item').addClass('disabled');
+            $('.btn-item').click(function(){
+              return false;
+            })
           }
         } else {
           $('.lists').before(
@@ -175,10 +191,32 @@
         }
       };
 
-      function error(){
-        $('ul').empty();
-        $('ul').prepend(
-        '<p class="message">通信エラーが発生しています。<br>検索ワードや通信が正常に出来ているか確認してください。</p>');
+      function error(a){
+        $('.lists').empty();
+        console.log(a);
+        switch(a) {
+          case 'wrong_parameter':
+            $('.lists').prepend(
+              '<p class="message">検索ワードを入力して下さい。</p>');
+              break;
+          case 'not_found':
+            $('.lists').prepend(
+              '<p class="message">検索ワード結果は0件です。</p>');
+              break;
+          case 'too_many_requests':
+            $('.lists').prepend(
+              '<p class="message">リクエスト数が上限に達しました。</p>');
+              break;
+          case 'system_error':
+            $('.lists').prepend(
+              '<p class="message">システムエラーです。</p>');
+              break;
+          case 'service_unavailable':
+            $('.lists').prepend(
+              '<p class="message">メンテンス中です</p>');
+              break;
+        }
+
       }
 
     </script>
