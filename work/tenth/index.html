@@ -92,23 +92,36 @@
       // </div>
 
       $(function () {
-        page = 1;
         $('.search__btn').on('click', function() {
+          page = 1;
           ajax();
         });
         $(document).on('click', '.btn-item', function(event){
           var btn = $(this).data('js');
           console.log(btn);
           event.preventDefault();
-          if (btn === "page-next"){
-            page += 1;
-            console.log('足します');
-            ajax();
-          } else if (btn === "page-prev"){
-            page -= 1;
-            console.log('引きます');
-            ajax();
-          }
+          console.log($('.btn-item[data-js="page-prev"]').hasClass('disabled'));
+            if (btn === "page-next"){
+              if ($('.btn-item[data-js="page-next"]').hasClass('disabled')){
+                $('.btn-item[data-js="page-next"]').click(function(){
+                return false;
+                })
+              } else{
+                page += 1;
+                console.log('足します');
+                ajax();
+              }
+            } else if (btn === "page-prev"){
+              if ($('.btn-item[data-js="page-prev"]').hasClass('disabled')){
+                $('.btn-item[data-js="page-prev"]').click(function(){
+                return false;
+                })
+              } else{
+              page -= 1;
+              console.log('引きます');
+              ajax();
+              }
+            }
         });
       });
 
@@ -133,8 +146,8 @@
           addhtml(data);
         }).fail(function(err){
           console.log(err);
-          console.log(err.responseJSON.error);
-          error(err.responseJSON.error);
+          console.log(err.status);
+          error(err.status);
         })
       }
 
@@ -167,23 +180,15 @@
                             '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
                           '</div>' +
                         '</div>';
-          $('.lists').append(pager);
+          $('.pager').remove();
+          $('.lists').after(pager);
 
           if (data.page === 1){
-            $('.btn-item[data-js="page-prev"]').addClass('disabled').prop("disabled", true);
-            $('.btn-item[data-js="page-prev"]').click(function(){
-              return false;
-            })
+            $('.btn-item[data-js="page-prev"]').addClass('disabled');
           } else if (data.page === data.pageCount){
-            $('.btn-item[data-js="page-next"]').addClass('disabled').prop("disabled", true);
-            $('.btn-item[data-js="page-next"]').click(function(){
-              return false;
-            })
+            $('.btn-item[data-js="page-next"]').addClass('disabled');
           } else if (data.pageCount === 1){
             $('.btn-item').addClass('disabled');
-            $('.btn-item').click(function(){
-              return false;
-            })
           }
         } else {
           $('.lists').before(
@@ -191,27 +196,26 @@
         }
       };
 
-      function error(a){
+      function error(ErrorText){
         $('.lists').empty();
-        console.log(a);
-        switch(a) {
-          case 'wrong_parameter':
+        switch(ErrorText) {
+          case 400:
             $('.lists').prepend(
               '<p class="message">検索ワードを入力して下さい。</p>');
               break;
-          case 'not_found':
+          case 404:
             $('.lists').prepend(
               '<p class="message">検索ワード結果は0件です。</p>');
               break;
-          case 'too_many_requests':
+          case 429:
             $('.lists').prepend(
               '<p class="message">リクエスト数が上限に達しました。</p>');
               break;
-          case 'system_error':
+          case 500:
             $('.lists').prepend(
               '<p class="message">システムエラーです。</p>');
               break;
-          case 'service_unavailable':
+          case 503:
             $('.lists').prepend(
               '<p class="message">メンテンス中です</p>');
               break;
