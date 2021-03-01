@@ -49,7 +49,7 @@
       //   datatype: 'json',
       //   data: {
       //     // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
-      //     applicationId: appId, (今回はこの変数をIDとして使用します) 
+      //     applicationId: appId, (今回はこの変数をIDとして使用します)
       //     ※メンターから別途渡されるファイルを読み込んでください。
       //     booksGenreId: '001'
       //   },
@@ -90,23 +90,26 @@
       //     <a class="btn-item" data-js="page-next" href="">次へ</a>
       //   </div>
       // </div>
-    
+
       $(function () {
+        page = 1;
         $('.search__btn').on('click', function() {
           ajax();
-        }); 
-        $('.btn-item[data-js="page-next"]').on('click', function(){
-          ajax();
-          e.preventDefault();
-          page += 1;
-          addhtml(data);
-          });
-          $('.btn-item[data-js="page-prev"]').on('click', function(){
-          ajax();
-          e.preventDefault();
-          page -= 1;
-          addhtml(data);
-          });    
+        });
+        $(document).on('click', '.btn-item', function(event){
+          var btn = $(this).data('js');
+          console.log(btn);
+          event.preventDefault();
+          if (btn === "page-next"){
+            page += 1;
+            console.log('足します');
+            ajax();
+          } else if (btn === "page-prev"){
+            page -= 1;
+            console.log('引きます');
+            ajax();
+          }
+        });
       });
 
 
@@ -114,7 +117,6 @@
       function ajax(){
         var searchword = $('.search__text__input').val();
         console.log(searchword);
-        var page = page;
         $.ajax({
           url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
           type: 'GET',
@@ -156,7 +158,7 @@
             '<span class="counter-current">' + data.page + '</span>' +
             '/<span class="counter-all">' + data.pageCount + '</span>' +
             '</div>' + '<div class="btn-wrapper">' + '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
-            '<a class="btn-item" data-js="page-next" href="">次へ</a>' + 
+            '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
             '</div>' + '</div>';
             $('ul').append(pager);
 
