@@ -91,43 +91,15 @@
       //   </div>
       // </div>
 
-      $(function () {
+      $(function (){
         searchword = '';
         $('.search__btn').on('click', function() {
           searchword = $('.search__text__input').val();
           page = 1;
           ajax();
         });
-        $(document).on('click', '.btn-item', function(event){
-          var btn = $(this).data('js');
-          console.log(btn);
-          console.log(searchword);
-          event.preventDefault();
-            if (btn === "page-next"){
-              if ($('.btn-item[data-js="page-next"]').hasClass('disabled')){
-                $('.btn-item[data-js="page-next"]').click(function(){
-                return false;
-                })
-              } else{
-                page += 1;
-                console.log('足します');
-                ajax();
-              }
-            } else if (btn === "page-prev"){
-              if ($('.btn-item[data-js="page-prev"]').hasClass('disabled')){
-                $('.btn-item[data-js="page-prev"]').click(function(){
-                return false;
-                })
-              } else{
-              page -= 1;
-              console.log('引きます');
-              ajax();
-              }
-            }
-        });
+        pageOperate();
       });
-
-
       //関数定義
       function ajax(){
         console.log(searchword);
@@ -140,11 +112,13 @@
             applicationId: appId,
             booksGenreId: '001',
             hits: '20',
-            page: page
+            page: page,
           },
         }).done(function(data) {
+          $('.message').empty();
           console.log(data);
           addhtml(data);
+          btnInact(data);
         }).fail(function(err){
           console.log(err);
           console.log(err.status);
@@ -177,58 +151,80 @@
                             '/<span class="counter-all">' + data.pageCount + '</span>' +
                           '</div>' +
                           '<div class="btn-wrapper">' +
-                            '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+                            '<a class="btn-item b" data-js="page-prev" href="">前へ</a>' +
                             '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
                           '</div>' +
                         '</div>';
           $('.pager').remove();
           $('.lists').after(pager);
-
-          if (data.page === 1){
-            $('.btn-item[data-js="page-prev"]').addClass('disabled');
-          } else if (data.page === data.pageCount){
-            $('.btn-item[data-js="page-next"]').addClass('disabled');
-          } else if (data.pageCount === 1){
-            $('.btn-item').addClass('disabled');
-          }
         } else {
-          $('.lists').before(
-          '<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>');
+          $('.pager').remove();
+          $('.lists').empty();
+          var errtext = '<p>検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。</p>';
+          $('.message').prepend(errtext);
         }
       };
-
+      function btnInact(data){
+        if (page === 1){
+          $('.btn-item[data-js="page-prev"]').addClass('disabled');
+        } else if (page === data.pageCount){
+          $('.btn-item[data-js="page-next"]').addClass('disabled');
+        } else if (data.pageCount === 1){
+          $('.btn-item').addClass('disabled');
+        }
+      }
+      function pageOperate(){
+        $(document).on('click', '.btn-item[data-js="page-next"]', function(event){
+          event.preventDefault();
+          if ($(this).hasClass('disabled')){
+            return false;
+          } else{
+            page += 1;
+            ajax();
+          }
+        });
+        $(document).on('click', '.btn-item[data-js="page-prev"]', function(event){
+          event.preventDefault();
+          if ($(this).hasClass('disabled')){
+            console.log('押せぬ');
+            return false;
+          } else{
+            page -= 1;
+            ajax();
+          }
+        });
+      }
       function error(ErrorText){
         $('.lists').empty();
         $('.pager').remove();
+        $('.message').empty();
         switch(ErrorText) {
           case 0:
-            $('.lists').prepend(
+            $('.message').prepend(
               '<p class="message">通信に失敗しました。インターネットの接続をご確認ください。</p>');
               break;
           case 400:
-            $('.lists').prepend(
+            $('.message').prepend(
               '<p class="message">検索ワードを入力して下さい。</p>');
               break;
           case 404:
-            $('.lists').prepend(
-              '<p class="message">検索ワード結果は0件です。</p>');
+            $('.message').prepend(
+              '<p class="message">検索結果は0件です。</p>');
               break;
           case 429:
-            $('.lists').prepend(
+            $('.message').prepend(
               '<p class="message">リクエスト数が上限に達しました。</p>');
               break;
           case 500:
-            $('.lists').prepend(
+            $('.message').prepend(
               '<p class="message">システムエラーです。</p>');
               break;
           case 503:
-            $('.lists').prepend(
+            $('.message').prepend(
               '<p class="message">メンテンス中です</p>');
               break;
         }
-
       }
-
     </script>
   </body>
 </html>
